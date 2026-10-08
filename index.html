@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050508">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Birthday Quest — a special mission has been unlocked.">
+  <title>Birthday Quest</title>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <canvas id="bg-particles" class="bg-particles" aria-hidden="true"></canvas>
+  <canvas id="fx-canvas" class="fx-canvas" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <button class="icon-btn" id="mute-btn" type="button" aria-label="Вимкнути звук" aria-pressed="false">
+      <span class="icon-mute hidden" aria-hidden="true">🔇</span>
+      <span class="icon-sound" aria-hidden="true">🔊</span>
+    </button>
+    <div class="progress-hud hidden" id="progress-hud">
+      <div class="progress-hud__label">
+        <span>QUEST PROGRESS</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+        <div class="bar__fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </header>
+
+  <main id="app">
+    <section class="screen is-active" id="screen-start" aria-labelledby="start-title">
+      <div class="hero">
+        <p class="eyebrow">MISSION FILE</p>
+        <h1 id="start-title" class="logo">
+          <span>BIRTHDAY</span>
+          <span>QUEST</span>
+        </h1>
+        <p class="tagline">A special mission has been unlocked.</p>
+      </div>
+      <div class="hud-card glass">
+        <div class="hud-row">
+          <span class="hud-k">PLAYER</span>
+          <span class="hud-v" data-name></span>
+        </div>
+        <div class="hud-row">
+          <span class="hud-k">STATUS</span>
+          <span class="hud-v accent-text">READY</span>
+        </div>
+      </div>
+      <button class="btn btn--xl pulse" id="btn-start" type="button">START QUEST</button>
+    </section>
+
+    <section class="screen" id="screen-resume" aria-labelledby="resume-title" hidden>
+      <p class="eyebrow">SESSION RESTORED</p>
+      <h2 id="resume-title">WELCOME BACK 👋</h2>
+      <div class="glass card">
+        <p class="muted">QUEST PROGRESS</p>
+        <p class="big-pct" id="resume-pct">0%</p>
+      </div>
+      <button class="btn btn--xl" id="btn-continue" type="button">CONTINUE</button>
+      <button class="btn btn--ghost" id="btn-reset" type="button">RESET QUEST</button>
+    </section>
+
+    <section class="screen" id="screen-boot" aria-labelledby="boot-title" hidden>
+      <h2 id="boot-title" class="sr-only">Initializing</h2>
+      <p class="boot-line" id="boot-status">INITIALIZING...</p>
+      <div class="bar bar--boot">
+        <div class="bar__fill" id="boot-fill"></div>
+      </div>
+      <p class="boot-pct" id="boot-pct">0%</p>
+      <ul class="boot-log" id="boot-log"></ul>
+    </section>
+
+    <section class="screen" id="screen-player" aria-labelledby="player-title" hidden>
+      <p class="eyebrow">PLAYER</p>
+      <h2 id="player-title" class="player-name" data-name></h2>
+      <div class="stats">
+        <article class="stat glass">
+          <span class="hud-k">LEVEL</span>
+          <strong>+1</strong>
+        </article>
+        <article class="stat glass">
+          <span class="hud-k">XP</span>
+          <strong>100%</strong>
+        </article>
+        <article class="stat glass stat--wide">
+          <span class="hud-k">STATUS</span>
+          <strong class="accent-text">BIRTHDAY MODE</strong>
+        </article>
+      </div>
+      <p class="joke">Apparently, you have successfully completed another year.</p>
+      <button class="btn btn--xl" id="btn-accept" type="button">ACCEPT MISSION</button>
+    </section>
+
+    <section class="screen" id="screen-map" aria-labelledby="map-title" hidden>
+      <p class="eyebrow">SELECT</p>
+      <h2 id="map-title">MISSION SELECT</h2>
+      <div class="missions" id="mission-list">
+        <button class="mission glass" data-mission="1" type="button">
+          <span class="mission__id">MISSION 01</span>
+          <span class="mission__icon" aria-hidden="true">🎁</span>
+          <span class="mission__name">THE GIFT</span>
+          <span class="mission__state">AVAILABLE</span>
+        </button>
+        <button class="mission glass is-locked" data-mission="2" type="button" disabled>
+          <span class="mission__id">MISSION 02</span>
+          <span class="mission__icon mission__icon--code" aria-hidden="true">#</span>
+          <span class="mission__name">MEMORY CODE</span>
+          <span class="mission__state">LOCKED</span>
+        </button>
+        <button class="mission glass is-locked" data-mission="3" type="button" disabled>
+          <span class="mission__id">MISSION 03</span>
+          <span class="mission__icon" aria-hidden="true">⭐</span>
+          <span class="mission__name">FINAL LEVEL</span>
+          <span class="mission__state">LOCKED</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-m1" aria-labelledby="m1-title" hidden>
+      <p class="eyebrow">MISSION 01</p>
+      <h2 id="m1-title">FIND THE GIFT</h2>
+      <p class="lede">One of these is hiding something special.</p>
+      <div class="gifts" id="gifts" role="group" aria-label="Подарункові коробки"></div>
+      <p class="feedback" id="m1-feedback" aria-live="polite"></p>
+      <button class="btn btn--xl hidden" id="btn-m1-next" type="button">CONTINUE</button>
+    </section>
+
+    <section class="screen" id="screen-m2" aria-labelledby="m2-title" hidden>
+      <p class="eyebrow">MISSION 02</p>
+      <h2 id="m2-title">MEMORY CODE</h2>
+      <p class="lede">Збери чотиризначний код за спільною пам’яттю. Одна підказка за раз.</p>
+
+      <div class="m2-garage" id="m2-garage">
+        <div class="m2-hazard" aria-hidden="true"></div>
+        <div class="m2-head">
+          <span class="m2-name">GARAGE TERMINAL</span>
+          <span class="m2-chip" id="m2-chip">LOCKED</span>
+        </div>
+
+        <div class="m2-bike" aria-hidden="true">
+          <svg viewBox="0 0 300.0 211.1" focusable="false"><path fill-rule="evenodd" d="M297.7 155.0Q296.9 151.5 295.1 147.3Q293.3 143.1 291.3 140.0Q289.2 136.9 286.3 133.8Q283.3 130.7 279.8 128.3Q276.4 125.9 273.5 124.6Q270.7 123.3 268.5 122.0Q266.4 120.7 263.3 119.7Q260.2 118.7 256.2 118.2Q252.2 117.6 252.5 117.4Q252.7 117.1 257.6 115.3Q262.5 113.5 264.6 112.5Q266.6 111.5 268.0 110.3Q269.4 109.2 269.8 108.4Q270.2 107.6 270.2 106.1Q270.2 104.5 269.6 102.4Q268.9 100.2 266.7 95.9Q264.6 91.7 262.2 88.2Q259.9 84.8 252.4 77.2Q244.8 69.6 236.2 61.9Q227.6 54.2 224.5 52.4Q221.4 50.6 220.2 50.6Q219.1 50.6 214.9 54.3Q210.6 58.0 221.9 66.9Q233.2 75.8 236.7 79.0Q240.2 82.2 240.0 82.3Q239.9 82.4 235.1 80.4Q230.4 78.3 228.3 78.6Q226.3 78.9 221.1 82.2Q216.0 85.5 215.5 85.5Q215.0 85.5 212.8 81.7Q210.6 77.8 209.5 76.9Q208.3 76.0 201.5 74.2Q194.7 72.4 185.4 70.5Q176.2 68.6 174.8 68.5Q173.4 68.3 172.9 68.1Q172.3 67.8 172.1 66.5Q171.8 65.2 171.1 64.0Q170.3 62.7 169.3 54.3Q168.2 46.0 168.2 44.9Q168.2 43.9 168.5 43.4Q168.8 42.9 170.0 41.4Q171.3 39.8 171.7 39.7Q172.1 39.6 175.2 41.9Q178.3 44.2 179.7 44.8Q181.1 45.5 183.1 45.5Q185.2 45.5 187.5 44.6Q189.8 43.7 190.8 42.6Q191.9 41.6 191.9 40.2Q191.9 38.8 193.7 35.3Q195.5 31.8 196.4 28.8Q197.3 25.7 198.0 25.0Q198.8 24.4 198.9 22.1Q199.1 19.8 198.4 16.8Q197.8 13.9 197.0 12.5Q196.2 11.0 194.6 9.2Q192.9 7.4 191.0 6.0Q189.0 4.6 186.7 3.5Q184.4 2.3 182.6 1.8Q180.8 1.3 178.3 1.2Q175.7 1.0 173.1 1.5Q170.5 2.1 168.2 3.1Q165.9 4.1 163.6 6.2Q161.3 8.2 160.5 9.4Q159.8 10.5 158.9 12.7Q158.0 14.9 158.0 16.7Q158.0 18.5 158.3 19.8Q158.7 21.1 160.0 23.4Q161.3 25.7 161.2 25.9Q161.0 26.2 158.0 27.5Q154.9 28.8 153.6 27.6Q152.3 26.5 151.0 25.8Q149.7 25.2 148.1 25.2Q146.4 25.2 145.6 25.6Q144.9 25.9 134.6 33.5Q124.3 41.1 116.4 47.5Q108.4 53.9 106.1 56.3Q103.8 58.6 100.6 62.3Q97.3 66.0 96.3 67.6Q95.3 69.1 94.1 71.5Q93.0 74.0 90.9 76.5Q88.9 79.1 87.5 82.3Q86.0 85.5 85.7 87.8Q85.3 90.2 83.7 89.9Q82.2 89.6 80.9 88.5Q79.6 87.3 76.7 82.1Q73.7 76.8 72.7 75.8Q71.7 74.7 70.6 74.2Q69.6 73.7 65.9 73.3Q62.2 72.9 54.5 73.1Q46.7 73.2 37.8 74.0Q28.8 74.7 24.7 75.6Q20.5 76.5 20.3 77.4Q20.0 78.3 20.7 79.5Q21.3 80.7 22.9 82.2Q24.4 83.7 25.9 84.9Q27.5 86.0 34.2 90.0Q40.8 94.0 53.9 101.1Q67.0 108.1 63.3 115.1Q59.6 122.0 57.3 121.4Q55.0 120.7 52.3 120.3Q49.6 119.9 46.0 119.9Q42.4 119.9 39.0 120.5Q35.7 121.0 29.5 117.1Q23.4 113.3 22.6 113.1Q21.8 113.0 21.2 113.3Q20.5 113.5 20.0 114.3Q19.5 115.1 17.9 122.9Q16.2 130.7 13.0 134.3Q9.8 137.9 8.0 140.8Q6.2 143.6 4.9 146.4Q3.6 149.2 2.4 153.7Q1.3 158.2 1.2 163.7Q1.0 169.3 1.9 173.8Q2.8 178.3 4.5 182.2Q6.2 186.2 8.5 189.7Q10.8 193.2 14.1 196.5Q17.5 199.8 20.4 201.9Q23.4 203.9 25.9 205.2Q28.5 206.5 31.1 207.4Q33.6 208.3 37.8 209.1Q41.9 209.8 46.0 209.8Q50.1 209.8 54.2 209.1Q58.3 208.3 61.8 207.0Q65.2 205.7 67.6 204.5Q69.9 203.2 72.8 201.0Q75.8 198.8 78.3 196.1Q80.9 193.4 83.1 190.2Q85.3 187.0 86.8 183.6Q88.4 180.3 89.3 177.2Q90.2 174.1 93.5 174.4Q96.8 174.7 97.1 174.9Q97.3 175.2 97.0 179.9Q96.6 184.7 94.0 190.5Q91.4 196.2 148.8 195.5Q206.3 194.7 207.0 193.4Q207.8 192.1 208.2 191.0Q208.6 189.8 208.6 188.1Q208.6 186.5 206.9 180.7Q205.2 174.9 205.1 171.6Q205.0 168.2 205.7 163.9Q206.5 159.5 207.1 157.7Q207.8 155.9 209.2 153.5Q210.6 151.0 210.7 151.4Q210.9 151.8 210.4 153.3Q209.8 154.9 209.3 158.2Q208.8 161.6 208.8 164.9Q208.8 168.2 209.2 171.1Q209.6 173.9 211.0 178.4Q212.4 182.9 213.6 185.2Q214.7 187.5 216.7 190.3Q218.6 193.2 222.0 196.6Q225.5 200.1 228.3 202.0Q231.2 203.9 233.7 205.2Q236.3 206.5 238.9 207.4Q241.4 208.3 244.4 208.9Q247.3 209.6 252.7 209.7Q258.1 209.8 262.6 208.9Q267.1 208.0 271.1 206.4Q275.1 204.7 278.6 202.4Q282.0 200.1 285.5 196.6Q289.0 193.2 291.3 189.7Q293.6 186.2 294.9 183.4Q296.1 180.6 296.8 178.5Q297.4 176.5 298.1 172.9Q298.7 169.3 298.6 163.9Q298.5 158.5 297.7 155.0ZM27.9 142.9Q30.8 144.3 28.8 146.1Q26.7 147.9 25.0 150.4Q23.4 152.8 22.5 155.0Q21.6 157.2 21.1 159.8Q20.5 162.3 20.5 164.4Q20.5 166.4 20.9 168.8Q21.3 171.1 22.6 174.1Q23.9 177.2 25.2 179.0Q26.5 180.8 28.3 182.5Q30.1 184.2 32.4 185.6Q34.7 187.0 37.6 187.9Q40.6 188.8 43.3 188.9Q46.0 189.0 44.0 188.8Q42.1 188.5 40.5 188.0Q38.8 187.5 37.1 186.7Q35.4 186.0 33.8 184.8Q32.1 183.6 30.2 181.7Q28.3 179.8 27.4 178.5Q26.5 177.2 25.2 174.1Q23.9 171.1 23.5 167.7Q23.1 164.4 23.4 162.5Q23.6 160.5 24.3 158.5Q24.9 156.4 25.7 154.9Q26.5 153.3 27.5 151.9Q28.5 150.5 30.1 149.0Q31.6 147.4 32.9 146.5Q34.2 145.6 36.7 146.9Q39.3 148.2 37.4 149.2Q35.4 150.3 33.8 151.8Q32.1 153.3 31.2 154.6Q30.3 155.9 29.4 158.1Q28.5 160.3 28.3 161.7Q28.0 163.1 28.0 164.9Q28.0 166.7 28.6 169.3Q29.3 171.8 30.6 174.0Q31.8 176.2 33.1 177.5Q34.4 178.8 36.7 180.2Q39.0 181.6 40.8 182.1Q42.6 182.6 44.9 182.7Q47.3 182.9 49.7 182.4Q52.1 181.8 54.5 180.6Q56.8 179.3 58.6 177.5Q60.4 175.7 61.5 173.6Q62.7 171.6 69.2 172.1Q75.8 172.6 76.0 173.0Q76.3 173.4 75.0 176.6Q73.7 179.8 72.2 182.1Q70.6 184.4 69.0 186.2Q67.3 188.0 65.0 189.8Q62.7 191.6 59.8 193.0Q57.0 194.4 54.2 195.2Q51.4 196.0 48.2 196.2Q44.9 196.5 42.0 196.1Q39.0 195.7 36.3 194.8Q33.6 193.9 30.7 192.3Q27.7 190.6 25.0 188.1Q22.3 185.7 20.5 183.3Q18.8 180.8 17.3 177.7Q15.9 174.7 15.3 171.8Q14.6 169.0 14.5 166.3Q14.4 163.6 14.8 160.8Q15.2 158.0 15.9 155.5Q16.7 153.1 18.5 149.9Q20.3 146.7 22.6 144.1Q24.9 141.5 27.9 142.9ZM105.2 136.9Q105.3 137.2 104.7 139.2Q104.0 141.3 101.8 142.8Q99.7 144.3 99.5 144.2Q99.4 144.1 102.2 140.4Q105.1 136.6 105.2 136.9ZM254.4 133.6Q257.4 133.6 259.9 134.1Q262.5 134.6 265.8 136.0Q269.2 137.4 271.9 139.3Q274.6 141.3 277.0 144.0Q279.5 146.7 281.2 149.9Q283.0 153.1 283.8 155.5Q284.6 158.0 285.0 160.8Q285.4 163.6 285.2 166.3Q285.1 169.0 284.3 172.2Q283.6 175.4 282.3 178.1Q281.0 180.8 279.3 183.1Q277.7 185.4 274.7 188.1Q271.7 190.8 268.7 192.5Q265.6 194.2 263.1 194.9Q260.7 195.7 257.6 196.1Q254.5 196.5 252.2 196.4Q249.9 196.2 246.7 195.5Q243.5 194.7 241.2 193.7Q238.9 192.6 236.4 191.0Q234.0 189.3 231.7 187.0Q229.4 184.7 227.4 181.7Q225.5 178.8 224.5 176.1Q223.5 173.4 222.9 170.8Q222.4 168.2 222.4 164.9Q222.4 161.6 222.7 160.0Q222.9 158.5 223.7 155.9Q224.5 153.3 225.4 151.5Q226.3 149.7 230.0 148.3Q233.7 146.9 234.2 147.4Q234.8 147.9 233.1 150.3Q231.4 152.6 230.7 154.2Q229.9 155.9 229.4 157.7Q228.9 159.5 228.7 163.7Q228.6 168.0 229.0 169.8Q229.4 171.6 230.1 173.6Q230.9 175.7 231.9 177.4Q233.0 179.0 234.4 180.7Q235.8 182.4 238.0 184.0Q240.2 185.7 242.3 186.7Q244.5 187.8 246.4 188.3Q248.4 188.8 251.2 188.9Q254.0 189.0 251.1 188.5Q248.1 188.0 245.3 186.7Q242.5 185.4 241.1 184.4Q239.6 183.4 238.1 181.8Q236.6 180.3 234.9 177.7Q233.2 175.2 232.2 171.6Q231.2 168.0 231.2 165.3Q231.2 162.6 232.2 159.0Q233.2 155.4 234.1 153.9Q235.0 152.3 235.9 151.3Q236.8 150.3 238.5 151.8Q240.2 153.3 239.3 154.5Q238.4 155.7 237.5 157.7Q236.6 159.8 236.3 160.9Q236.0 162.1 236.0 164.9Q236.0 167.7 236.6 169.6Q237.1 171.6 237.7 172.9Q238.4 174.1 240.2 176.3Q242.0 178.5 243.9 179.8Q245.8 181.1 247.1 181.6Q248.4 182.1 250.3 182.5Q252.2 182.9 253.8 182.9Q255.3 182.9 256.8 182.6Q258.4 182.4 260.6 181.5Q262.8 180.6 263.9 179.8Q265.1 179.0 266.5 177.6Q267.9 176.2 269.2 174.0Q270.5 171.8 271.1 169.3Q271.7 166.7 271.7 164.9Q271.7 163.1 271.0 160.3Q270.2 157.4 268.9 155.4Q267.6 153.3 265.3 151.4Q263.0 149.5 261.7 148.8Q260.4 148.2 258.6 147.7Q256.8 147.2 255.1 147.2Q253.3 147.2 252.7 144.9Q252.2 142.6 253.4 142.3Q254.5 142.0 257.7 142.6Q261.0 143.1 263.8 144.3Q266.6 145.6 267.5 146.3Q268.4 146.9 270.3 148.7Q272.3 150.5 273.5 152.3Q274.8 154.1 275.6 155.7Q276.4 157.2 277.0 159.8Q277.7 162.3 277.5 160.8Q277.4 159.2 276.8 156.9Q276.1 154.6 274.2 151.4Q272.3 148.2 270.8 146.8Q269.4 145.4 268.0 144.3Q266.6 143.3 264.9 142.4Q263.3 141.5 261.3 140.9Q259.4 140.2 258.0 140.0Q256.6 139.7 254.3 139.7Q252.0 139.7 251.7 139.5Q251.5 139.2 251.2 136.9Q250.9 134.6 251.2 134.1Q251.5 133.6 254.4 133.6ZM92.5 120.2Q97.6 122.8 97.9 123.3Q98.1 123.8 96.6 130.0Q95.0 136.1 89.8 138.8Q84.5 141.5 81.9 138.1Q79.4 134.6 75.9 131.5Q72.4 128.4 73.2 128.0Q74.0 127.7 81.8 125.5Q89.6 123.3 88.2 120.7Q86.8 118.2 87.1 117.9Q87.3 117.6 92.5 120.2ZM75.9 119.7Q75.3 122.3 74.9 122.8Q74.5 123.3 71.3 124.3Q68.1 125.3 67.7 125.3Q67.3 125.3 65.4 124.3Q63.4 123.3 66.4 118.4Q69.3 113.5 72.9 115.3Q76.5 117.1 75.9 119.7ZM152.1 64.7Q152.3 65.0 152.8 66.8Q153.3 68.6 153.1 69.1Q152.8 69.6 149.1 71.4Q145.4 73.2 142.4 75.1Q139.5 77.1 137.5 78.7Q135.6 80.4 134.5 82.2Q133.3 84.0 131.4 81.7Q129.5 79.4 132.0 77.2Q134.6 75.0 138.6 72.3Q142.6 69.6 147.2 67.0Q151.8 64.5 152.1 64.7Z"/></svg>
+          <i class="m2-floor"></i>
+        </div>
+
+        <div class="m2-gauge" role="img" aria-label="Прогрес коду">
+          <svg viewBox="0 0 120 72" aria-hidden="true">
+            <path class="m2-g-track" d="M10 60 A50 50 0 0 1 110 60" pathLength="100"/>
+            <path class="m2-g-fill" id="m2-gfill" d="M10 60 A50 50 0 0 1 110 60" pathLength="100"/>
+            <g class="m2-g-ticks" id="m2-gticks"></g>
+            <g class="m2-needle" id="m2-gneedle"><line x1="60" y1="60" x2="60" y2="22"/></g>
+            <circle class="m2-hub" cx="60" cy="60" r="5"/>
+            <text class="m2-g-count" id="m2-progress" x="60" y="71" text-anchor="middle">0/4</text>
+          </svg>
+        </div>
+
+        <div class="m2-cells" id="code-cells" aria-label="Код доступу"></div>
+
+        <div class="m2-panel" id="m2-panel">
+          <div class="m2-meta"><span id="m2-qlabel"></span><span id="m2-status"></span></div>
+          <p class="m2-q" id="m2-hint"></p>
+          <div class="m2-answers" id="m2-answers" role="group" aria-label="Варіанти відповіді"></div>
+          <p class="m2-feedback" id="m2-feedback" aria-live="polite"></p>
+        </div>
+
+        <div class="m2-success hidden" id="m2-access" role="status">
+          <p class="m2-granted">Молодчинка❤️</p>
+          <p class="m2-xp">+400 XP</p>
+          <p class="m2-note">Давай далі)</p>
+        </div>
+        <button class="btn btn--xl hidden" id="btn-m2-next" type="button">CONTINUE</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-greet" aria-labelledby="greet-title" hidden>
+      <h2 id="greet-title" class="greet-title">HAPPY BIRTHDAY,<br><span data-name></span> 🎂</h2>
+      <div class="letter glass">
+        <p id="greet-text" class="typed"></p>
+        <ul class="wishes hidden" id="wishes"></ul>
+      </div>
+      <button class="btn btn--ghost" id="btn-skip" type="button">SKIP</button>
+      <button class="btn btn--xl hidden" id="btn-greet-next" type="button">CONTINUE</button>
+    </section>
+
+    <section class="screen" id="screen-m3" aria-labelledby="m3-title" hidden>
+      <p class="eyebrow">FINAL LEVEL</p>
+      <h2 id="m3-title">ONE LAST THING...</h2>
+      <p class="lede" id="m3-status">Вкажи, коли ми почали спілкуватись?</p>
+      <div class="date-input" id="date-input-container">
+        <div class="date-cell">
+          <input type="number" id="m3-day" min="1" max="31" placeholder="01" aria-label="День" maxlength="2">
+          <span class="date-label">День</span>
+        </div>
+        <span class="date-separator">/</span>
+        <div class="date-cell">
+          <input type="number" id="m3-month" min="1" max="12" placeholder="01" aria-label="Місяць" maxlength="2">
+          <span class="date-label">Місяць</span>
+        </div>
+        <span class="date-separator">/</span>
+        <div class="date-cell">
+          <input type="number" id="m3-year" min="0" max="99" placeholder="26" aria-label="Рік" maxlength="2">
+          <span class="date-label">Рік</span>
+        </div>
+      </div>
+      <p class="feedback" id="m3-feedback" aria-live="polite"></p>
+      <button class="btn btn--xl hidden" id="btn-claim" type="button">CONTINUE</button>
+    </section>
+
+    <section class="screen screen--finale" id="screen-finale" aria-labelledby="finale-title" hidden>
+      <h2 id="finale-title" class="logo finale-logo">QUEST COMPLETE 🎉</h2>
+      <p class="finale-hi">Happy Birthday, <span data-name></span>!</p>
+      <p class="finale-msg">Сподіваюсь, цей маленький квест хоча б трохи підняв тобі настрій ❤️</p>
+      <p class="finale-ps">P.S. А це ми ще навіть не бачилися 😄, натисни на кніпочку)</p>
+      <button class="btn btn--ghost" id="btn-secret" type="button">???</button>
+      <p class="secret hidden" id="secret" role="status">
+        <span class="secret__trophy" aria-hidden="true">🏆</span>
+        Secret achievement unlocked.<br>
+        Ти офіційно пройшла Birthday Quest.  | Вітаю з днем народження тобі сьогодні 19❤️. 
+      </p>
+    </section>
+  </main>
+
+  <div class="modal hidden" id="reset-modal" role="dialog" aria-modal="true" aria-labelledby="reset-title">
+    <div class="glass modal__card">
+      <h2 id="reset-title">Reset quest?</h2>
+      <p>Прогрес буде стерто. Почнеш з першого екрана.</p>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" id="btn-reset-no" type="button">Cancel</button>
+        <button class="btn" id="btn-reset-yes" type="button">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
